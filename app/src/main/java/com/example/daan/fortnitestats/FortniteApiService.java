@@ -15,7 +15,7 @@ public interface FortniteApiService {
     String apiToken = "4b04a1d4-0288-4968-89cd-1796ba5fc5c2";
 
     Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LifeTimeStats.class, new Deserializer<LifeTimeStats>())
+            .registerTypeAdapter(User.class, new UserDeserializer())
             .create();
 
     Retrofit retrofit = new Retrofit.Builder()

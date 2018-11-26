@@ -49,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 Log.i("Response succes", response.body().toString());
-                Log.i("Array value", response.body().getLifeTimeStats().getLifeTimeStats()[0]);
+                User user = response.body();
+
+                Log.i("User Stats", user.getLifeTimeStats().get("Top 5s"));
             }
 
             @Override

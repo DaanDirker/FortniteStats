@@ -48,10 +48,8 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                Log.i("Response succes", response.body().toString());
                 User user = response.body();
-
-                Log.i("User Stats", user.getLifeTimeStats().get("Top 5s"));
+                Log.i("toString", user.toString());
             }
 
             @Override

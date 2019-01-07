@@ -1,5 +1,7 @@
-package com.example.daan.fortnitestats;
+package com.example.daan.fortnitestats.services.api;
 
+import com.example.daan.fortnitestats.models.User;
+import com.example.daan.fortnitestats.services.helpers.UserDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -30,4 +32,6 @@ public interface FortniteApiService {
             @Path("platform") String platform,
             @Path("username") String username
     );
+
+    //TODO: Add GetMatches call
 }

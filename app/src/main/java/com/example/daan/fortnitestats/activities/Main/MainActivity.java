@@ -1,4 +1,4 @@
-package com.example.daan.fortnitestats;
+package com.example.daan.fortnitestats.activities.Main;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -6,6 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.example.daan.fortnitestats.services.api.FortniteApiService;
+import com.example.daan.fortnitestats.R;
+import com.example.daan.fortnitestats.models.User;
 
 import retrofit2.Call;
 import retrofit2.Callback;

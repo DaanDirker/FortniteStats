@@ -1,26 +1,37 @@
 package com.example.daan.fortnitestats.activities.Main;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.daan.fortnitestats.services.api.FortniteApiService;
+import com.example.daan.fortnitestats.activities.Main.fragments.FavouritesFragment;
+import com.example.daan.fortnitestats.activities.Main.fragments.SearchFragment;
+import com.example.daan.fortnitestats.activities.Main.viewmodels.UserViewModel;
 import com.example.daan.fortnitestats.R;
+import com.example.daan.fortnitestats.activities.Stats.StatsActivity;
 import com.example.daan.fortnitestats.models.User;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.daan.fortnitestats.services.repositories.FavouriteUserRepository;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText mUsernameEdit;
-    private Button mRetrieveButton;
+    public static final String USER_KEY = "com.example.daan.fortnitestats.activities.Main.MainActivity.User";
 
-    private FortniteApiService apiService;
+    private UserViewModel mUserViewModel;
+    private FloatingActionButton mFabButton;
+    private boolean favouritesSelected = false;
+
+    private Fragment searchFragment;
+    private Fragment favouritesFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,38 +39,67 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Init
-        mUsernameEdit = findViewById(R.id.usernameEdit);
-        mRetrieveButton = findViewById(R.id.retrieveButton);
-        apiService = FortniteApiService.retrofit.create(FortniteApiService.class);
+        mFabButton = findViewById(R.id.fabFavouriteButton);
+        searchFragment = new SearchFragment();
+        favouritesFragment = new FavouritesFragment();
 
-        //For testing purposes
-        fetchUser("pc", "Rgamer1");
+        // Add both fragments and hide favourites fragment
+        FragmentManager fragmentManager = this.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.mainSearchHolder, searchFragment);
+        fragmentTransaction.add(R.id.mainFavouritesHolder, favouritesFragment);
+        fragmentTransaction.hide(favouritesFragment);
+        fragmentTransaction.commit();
 
-        mRetrieveButton.setOnClickListener(new View.OnClickListener() {
+        mUserViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+        mUserViewModel.getUser().observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(@Nullable User user) {
+                if (user != null) {
+                    Intent intent = new Intent(MainActivity.this, StatsActivity.class);
+                    intent.putExtra(USER_KEY, user);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "User not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mFabButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String enteredUsername = mUsernameEdit.getText().toString();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-                if (enteredUsername != null) {
-                    fetchUser("pc", enteredUsername);
+                //Switch between fragments with hide,show
+                if (!favouritesSelected) {
+                    setFavouritesSelected(true);
+                    transaction.hide(searchFragment);
+                    transaction.show(favouritesFragment);
+                    mFabButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_white_24dp));
+                } else {
+                    setFavouritesSelected(false);
+                    transaction.hide(favouritesFragment);
+                    transaction.show(searchFragment);
+                    mFabButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
                 }
+
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
+        mFabButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                //Testing
+                FavouriteUserRepository repository = new FavouriteUserRepository(getApplication());
+                repository.deleteAllUsers();
+                return true;
             }
         });
     }
 
-    private void fetchUser(String platform, String username) {
-        Call<User> call = apiService.getUser(platform, username);
-        call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                User user = response.body();
-                Log.i("toString", user.toString());
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.d("Response failed", t.toString());
-            }
-        });
+    public void setFavouritesSelected (boolean value) {
+        this.favouritesSelected = value;
     }
 }

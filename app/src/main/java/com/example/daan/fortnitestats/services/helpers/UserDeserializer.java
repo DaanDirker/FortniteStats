@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
@@ -19,7 +20,9 @@ public class UserDeserializer implements JsonDeserializer<User> {
         Gson gson = new Gson();
         User user = gson.fromJson(json, User.class);
 
-        JsonArray lifeTimeStatsArray = json.getAsJsonObject().get("lifeTimeStats").getAsJsonArray();
+        JsonObject mainObject = json.getAsJsonObject();
+
+        JsonArray lifeTimeStatsArray = mainObject.get("lifeTimeStats").getAsJsonArray();
         Map<String, String> lifeTimeStatsMap = new HashMap<>();
 
         //Map JsonArray to a HashMap
